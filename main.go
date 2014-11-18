@@ -106,8 +106,8 @@ func main() {
 	f.Seek(int64(gap)+wakasaSeekOffset, os.SEEK_SET)
 
 	// 標準出力に書き込む
-	bufr := bufio.NewReader(f)
-	bufw := bufio.NewWriter(os.Stdout)
+	bufr := bufio.NewReaderSize(f, 16384)
+	bufw := bufio.NewWriterSize(os.Stdout, 16384)
 	for {
 		b, err := bufr.ReadByte()
 		if err == io.EOF {
