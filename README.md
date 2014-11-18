@@ -41,6 +41,12 @@ Install
 $ go get github.com/kteru/wakasacat
 ```
 
+Todo
+----
+
+- 詳細出力オプション
+- わかさトラップの位置を出力して終了するオプション
+
 Licence
 -------
 
