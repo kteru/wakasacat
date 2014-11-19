@@ -11,9 +11,11 @@ import (
 var (
 	option = struct {
 		maxSearchPackets int
+		verbose          bool
 		fileName         string
 	}{
 		1000000,
+		false,
 		"",
 	}
 )
@@ -21,12 +23,22 @@ var (
 func parseCmdArgs() {
 	// オプションの処理
 	flag.IntVar(&option.maxSearchPackets, "m", option.maxSearchPackets, "Number of ts packets to search Wakasa-trap (default: 1000000)")
+	flag.BoolVar(&option.verbose, "v", option.verbose, "Enable verbose output to stderr")
 	flag.Parse()
 
 	// 引数の処理
 	if len(flag.Args()) > 0 {
 		option.fileName = flag.Arg(0)
 	}
+}
+
+func vfprintf(w io.Writer, format string, a ...interface{}) (int, error) {
+	// verbose フラグが立っていたら出力
+	if option.verbose {
+		return fmt.Fprintf(w, format, a...)
+	}
+
+	return 0, nil
 }
 
 func main() {

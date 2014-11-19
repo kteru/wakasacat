@@ -34,6 +34,10 @@ Command Line Options
 
 先頭から `<num>` 個の TS パケット内の PAT/PMT を解析する。
 
+### `-v`
+
+標準エラー出力に詳細情報を出力する
+
 Install
 -------
 
@@ -44,7 +48,6 @@ $ go get github.com/kteru/wakasacat
 Todo
 ----
 
-- 詳細出力オプション
 - わかさトラップの位置を出力して終了するオプション
 - プログラム ID の指定オプション
 - PID の変更検知をもっと厳密に (映像と音声の PID の切り替わりを対象にする)
