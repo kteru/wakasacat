@@ -52,18 +52,20 @@ func main() {
 
 	// 標準入力 or 引数から開く
 	if option.fileName != "" {
+		vfprintf(os.Stderr, "Reading from \"%s\"\n", option.fileName)
 		f, err = os.Open(option.fileName)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
 		}
 	} else {
+		vfprintf(os.Stderr, "Reading from stdin\n")
 		f = os.Stdin
 	}
 
 	// sync_byte の頭出し処理
 	if c, _ := f.Read(pkt[:]); c == 0 {
-		fmt.Fprintf(os.Stderr, "ts packet is not found.\n")
+		fmt.Fprintf(os.Stderr, "TS packet is not found.\n")
 		os.Exit(1)
 	}
 	gap, err = pkt.Gap()
@@ -71,18 +73,25 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	} else {
+		vfprintf(os.Stderr, "Gap is %d byte\n", gap)
 		// gap の分先頭からシーク
 		f.Seek(int64(gap), os.SEEK_SET)
 	}
 
 	// わかさトラップを探索
+	vfprintf(os.Stderr, "Searching Wakasa-trap\n")
+
 	var firstPmtPid, firstElemPid, firstElemPidBefore uint16
 	var patPos int64
 
 	for i := 0; i < option.maxSearchPackets; i++ {
 		// 1 パケット読む
 		if c, _ := f.Read(pkt[:]); c == 0 {
+			vfprintf(os.Stderr, "Reached the end of the input\n")
 			break
+		}
+		if i == option.maxSearchPackets-1 {
+			vfprintf(os.Stderr, "Reached the max number of search packet\n")
 		}
 
 		// PAT
@@ -105,6 +114,7 @@ func main() {
 
 			// わかさトラップを見つけたら直前の PAT 位置を記録し探索終了
 			if firstElemPid != firstElemPidBefore && firstElemPidBefore != 0 {
+				vfprintf(os.Stderr, "DISCOVERED Wakasa-trap at packet %d, previous PAT is packet %d\n", i+1, patPos+1)
 				wakasaSeekOffset = patPos * int64(len(pkt))
 				break
 			}
@@ -118,6 +128,8 @@ func main() {
 	f.Seek(int64(gap)+wakasaSeekOffset, os.SEEK_SET)
 
 	// 標準出力に書き込む
+	vfprintf(os.Stderr, "Starting output\n")
+
 	bufr := bufio.NewReaderSize(f, 16384)
 	bufw := bufio.NewWriterSize(os.Stdout, 16384)
 	for {
@@ -128,6 +140,8 @@ func main() {
 		bufw.WriteByte(b)
 	}
 	bufw.Flush()
+
+	vfprintf(os.Stderr, "Done\n")
 
 	f.Close()
 }
