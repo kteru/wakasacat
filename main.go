@@ -86,7 +86,7 @@ func main() {
 
 	for i := 0; i < option.maxSearchPackets; i++ {
 		// 1 パケット読む
-		if c, _ := f.Read(pkt[:]); c == 0 {
+		if c, _ := f.Read(pkt[:]); c < 188 {
 			vfprintf(os.Stderr, "Reached the end of the input\n")
 			break
 		}
