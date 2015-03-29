@@ -81,7 +81,9 @@ func main() {
 	// わかさトラップを探索
 	vfprintf(os.Stderr, "Searching Wakasa-trap\n")
 
-	var firstPmtPid, firstElemPid, firstElemPidBefore uint16
+	var firstPmtPid uint16
+	var firstElemPid, firstElemPidBefore uint16
+	var secondElemPid, secondElemPidBefore uint16
 	var patPos int64
 
 	for i := 0; i < option.maxSearchPackets; i++ {
@@ -116,14 +118,23 @@ func main() {
 			// 1 番目の番組の 1 つめのストリームの pid を取得
 			firstElemPid = uint16(pkt[index+1]&0xF)<<8 + uint16(pkt[index+2])
 
+			// 可変長部分
+			index += uint16(pkt[index+3]&0xF)<<8 + uint16(pkt[index+4])
+			index += 5
+
+			// 1 番目の番組の 2 つめのストリームの pid を取得
+			secondElemPid = uint16(pkt[index+1]&0xF)<<8 + uint16(pkt[index+2])
+
 			// わかさトラップを見つけたら直前の PAT 位置を記録し探索終了
-			if firstElemPid != firstElemPidBefore && firstElemPidBefore != 0 {
+			if (firstElemPid != firstElemPidBefore && firstElemPidBefore != 0) ||
+				(secondElemPid != secondElemPidBefore && secondElemPidBefore != 0) {
 				vfprintf(os.Stderr, "DISCOVERED Wakasa-trap at packet %d, previous PAT is packet %d\n", i+1, patPos+1)
 				wakasaSeekOffset = patPos * int64(len(pkt))
 				break
 			}
 
 			firstElemPidBefore = firstElemPid
+			secondElemPidBefore = secondElemPid
 			continue
 		}
 	}
