@@ -108,7 +108,7 @@ func main() {
 
 		// PMT
 		if pkt.Pid() == firstPmtPid && pkt.PayloadUnitStartIndicator() {
-			// 固定長部分
+			// インデックス
 			index := uint16(0)
 
 			// 番組情報長
