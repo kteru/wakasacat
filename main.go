@@ -106,11 +106,15 @@ func main() {
 
 		// PMT
 		if pkt.Pid() == firstPmtPid && pkt.PayloadUnitStartIndicator() {
-			// 番組情報長の取得
-			pInfoLen := uint16(pkt[15]&0xF)<<8 + uint16(pkt[16])
+			// 固定長部分
+			index := uint16(0)
+
+			// 番組情報長
+			index += uint16(pkt[index+15]&0xF)<<8 + uint16(pkt[index+16])
+			index += 17
 
 			// 1 番目の番組の 1 つめのストリームの pid を取得
-			firstElemPid = uint16(pkt[17+pInfoLen+1]&0xF)<<8 + uint16(pkt[17+pInfoLen+2])
+			firstElemPid = uint16(pkt[index+1]&0xF)<<8 + uint16(pkt[index+2])
 
 			// わかさトラップを見つけたら直前の PAT 位置を記録し探索終了
 			if firstElemPid != firstElemPidBefore && firstElemPidBefore != 0 {
